@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Corporate Staff Directory</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px; background-color: #f4f6f9; color: #333; }
+        .container { max-width: 1400px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .header-flex { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e9ecef; padding-bottom: 15px; margin-bottom: 25px; }
+        h2 { margin: 0; color: #0056b3; font-size: 26px; }
+        .user-badge { background-color: #e9ecef; padding: 8px 15px; border-radius: 20px; font-size: 14px; color: #495057; }
+        .btn-signout { background-color: #dc3545; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; font-size: 13px; font-weight: bold; }
+        .btn-signout:hover { background-color: #bd2130; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px 15px; text-align: left; font-size: 13px; border-bottom: 1px solid #dee2e6; }
+        th { background-color: #007bff; color: white; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; font-size: 11px; }
+        tr:hover { background-color: #f8f9fa; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        .badge-tech { background-color: #e2f0fe; color: #0056b3; }
+        .badge-comm { background-color: #e6fcf5; color: #0ca678; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-flex">
+            <div>
+                <h2>Live Corporate Staff Directory</h2>
+                <span style="color: #6c757d; font-size: 13px;">Connected Engine Mode: MySQL Database (`company_management`)</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <span class="user-badge">Logged in as: <b>{{ email }}</b> (<i>{{ role }}</i>)</span>
+                <a href="/logout" class="btn-signout">Sign Out / Switch User</a>
+            </div>
+        </div>
+        <table>
+            <thead>
+                <tr><th>Emp #</th><th>Full Name</th><th>Salary</th><th>Job Category & Level</th><th>Exp.</th><th>Reports To</th><th>Directorate</th><th>Client Phone</th><th>Start Date</th><th>Email Address</th><th>Office / Location</th></tr>
+            </thead>
+            <tbody>
+                {% for emp in staff %}
+                <tr>
+                    <td><b>{{ emp.employee_number }}</b></td>
+                    <td>{{ emp.first_name }} {{ emp.last_name }}</td>
+                    <td><b>${{ emp.salary }}</b></td>
+                    <td>{{ emp.job_level }} <small style="color: #6c757d;">({{ emp.job_category }})</small></td>
+                    <td>{{ emp.years_of_experience }} yrs</td>
+                    <td>{{ emp.manager_name if emp.manager_name else 'None' }}</td>
+                    <td><span class="badge {% if emp.directorate == 'Technology' %}badge-tech{% else %}badge-comm{% endif %}">{{ emp.directorate }}</span></td>
+                    <td>{{ emp.customer_phone if emp.customer_phone else '—' }}</td>
+                    <td>{{ emp.start_date }}</td>
+                    <td>{{ emp.email }}</td>
+                    <td>{{ emp.site_location }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

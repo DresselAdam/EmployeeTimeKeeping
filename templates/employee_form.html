@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Corporate Timekeeping Form</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .form-card { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 550px; width: 100%; box-sizing: border-box; }
+        h2 { color: #0056b3; margin-top: 0; margin-bottom: 5px; text-align: center; }
+        p { color: #6c757d; font-size: 14px; margin-bottom: 25px; text-align: center; }
+        .form-group { margin-bottom: 18px; display: flex; flex-direction: column; }
+        label { font-size: 13px; font-weight: 600; color: #495057; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        input[type="text"], select { padding: 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 14px; background-color: #fff; width: 100%; box-sizing: border-box; }
+        input:disabled { background-color: #e9ecef; color: #495057; cursor: not-allowed; font-weight: bold; }
+        .btn-submit { background-color: #28a745; color: white; border: none; padding: 12px; font-size: 15px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
+        .btn-submit:hover { background-color: #218838; }
+        .btn-export-single {
+            display: block;
+            text-align: center;
+            background-color: #6c757d;
+            color: white;
+            padding: 10px;
+            margin-top: 10px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .back-link { display: block; text-align: center; margin-top: 20px; color: #007bff; text-decoration: none; font-size: 13px; }
+    </style>
+    
+    <script>
+        const accountMap = {
+            {% for acct in account_list %}
+                "{{ acct.nwa_acct }}": {
+                    network: "{{ acct.network }}",
+                    desc: "{{ acct.nwa_description | replace('"', '\\"') }}"
+                },
+            {% endfor %}
+        };
+
+        function updateAccountDetails() {
+            const selectedValue = document.getElementById("nwa_select").value;
+            const networkInput = document.getElementById("network_display");
+            const descInput = document.getElementById("desc_display");
+            
+            if (selectedValue && accountMap[selectedValue]) {
+                networkInput.value = accountMap[selectedValue].network;
+                descInput.value = accountMap[selectedValue].desc;
+            } else {
+                networkInput.value = "";
+                descInput.value = "";
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="form-card">
+        <h2>Timekeeping Allocation</h2>
+        <p>Logged in as Employee ID: <b>{{ emp_data.employee_number }}</b></p>
+        
+        <form method="POST" action="{{ url_for('submit_time_entry') }}">
+            <!-- Hidden fields for non-editable data that still needs to save -->
+            <input type="hidden" name="employee_number" value="{{ emp_data.employee_number }}">
+            <input type="hidden" name="team" value="{{ emp_data.team if emp_data.team else 'No Team Assigned' }}">
+
+            <div class="form-group">
+                <label>Name</label>
+                <input type="text" value="{{ emp_data.first_name }} {{ emp_data.last_name }}" disabled>
+            </div>
+
+            <div class="form-group">
+                <label>Team</label>
+                <input type="text" value="{{ emp_data.team if emp_data.team else 'No Team Assigned' }}" disabled>
+            </div>
+
+            <div class="form-group">
+                <label>NWA_acc</label>
+                <select id="nwa_select" name="nwa_acct" onchange="updateAccountDetails()" required>
+                    <option value="">-- Choose an Account Code --</option>
+                    {% for acct in account_list %}
+                        <option value="{{ acct.nwa_acct }}">{{ acct.nwa_acct }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Network</label>
+                <input type="text" id="network_display" placeholder="Autofilled from selection" disabled>
+            </div>
+
+            <div class="form-group">
+                <label>NWA Description</label>
+                <input type="text" id="desc_display" placeholder="Autofilled from selection" disabled>
+            </div>
+
+            <div class="form-group">
+                <label>Epic Number</label>
+                <input type="text" name="epic_number" placeholder="Enter Epic Number Code">
+            </div>
+
+            <div class="form-group">
+                <label>Epic Description</label>
+                <input type="text" name="epic_description" placeholder="Enter Epic Scope Description">
+            </div>
+
+            <div class="form-group">
+                <label>Hours Worked</label>
+                <input type="number" step="0.5" name="hours_worked" placeholder="e.g. 8.0" required>
+            </div>
+
+            <button type="submit" class="btn-submit">Save Record</button>
+            <a href="/" class="back-link">← Cancel / Exit Session</a>
+            <a href="{{ url_for('export_csv', employee_number=emp_data.employee_number) }}" class="btn-export-single">
+                Export Employee #{{ emp_data.employee_number }} (CSV)</a>
+        </form>
+    </div>
+</body>
+</html>
